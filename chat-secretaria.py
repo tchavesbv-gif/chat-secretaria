@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 import streamlit as st
 from supabase import create_client, Client
@@ -50,7 +50,7 @@ with st.container():
                 except Exception as e:
                     st.error(f"Erro ao enviar o arquivo: {e}")
 
-            # Captura a data e hora ajustada rigorosamente para o fuso horário do Brasil
+            # Captura a data e hora ajustada para o fuso horário do Brasil
             fuso_brasil = pytz.timezone('America/Sao_Paulo')
             data_hora_brasil = datetime.now(fuso_brasil).isoformat()
 
@@ -89,11 +89,16 @@ try:
             tipo_arquivo = msg.get("tipo_arquivo")
             created_at_str = msg.get("created_at")
 
-            # Formata a exibição amigável da data e hora vindas do banco
+            # Formata a exibição amigável da data e hora aplicando o ajuste exato de fuso
             if created_at_str:
                 try:
-                    dt_obj = datetime.fromisoformat(created_at_str.replace("Z", "+00:00"))
-                    hora_formatada = dt_obj.strftime("%d/%m/%Y às %H:%M")
+                    limpo = created_at_str.replace("Z", "").split("+")[0]
+                    dt_obj = datetime.fromisoformat(limpo)
+                    
+                    # Subtrai 3 horas para alinhar perfeitamente com o horário oficial do Brasil
+                    dt_brasil = dt_obj - timedelta(hours=3)
+                    
+                    hora_formatada = dt_brasil.strftime("%d/%m/%Y às %H:%M")
                 except:
                     hora_formatada = created_at_str[:16].replace("T", " ")
             else:
