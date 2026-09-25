@@ -1,2 +1,5 @@
 streamlit
 supabase
+streamlit
+supabase
+pytz
